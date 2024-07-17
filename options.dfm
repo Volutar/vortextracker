@@ -47,6 +47,13 @@ object Form1: TForm1
         Height = 217
         Caption = ' Interface Options '
         TabOrder = 0
+        object Label8: TLabel
+          Left = 324
+          Top = 28
+          Width = 159
+          Height = 13
+          Caption = 'External tracker exchange format:'
+        end
         object DecNumbersLines: TCheckBox
           Left = 12
           Top = 27
@@ -111,6 +118,21 @@ object Form1: TForm1
           Caption = 'Don'#39't show Info Window when track is loaded'
           TabOrder = 6
           OnMouseUp = DisableInfoWinOptMouseUp
+        end
+        object ExtTrackerOpt: TComboBox
+          Left = 324
+          Top = 48
+          Width = 145
+          Height = 21
+          Style = csDropDownList
+          ItemHeight = 13
+          TabOrder = 7
+          OnChange = ExtTrackerOptChange
+          Items.Strings = (
+            'OpenMPT (MODPlug)'
+            'Renoise'
+            'FamiTracker'
+            'Furnace Tracker')
         end
       end
       object BackupOpts: TGroupBox

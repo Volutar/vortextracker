@@ -409,21 +409,8 @@ object MainForm: TMainForm
       object N21: TMenuItem
         Caption = '-'
       end
-      object CopyToModPlug: TMenuItem
-        Action = CopyToModplugAct
-        ImageIndex = 44
-      end
-      object CopyToRenoise: TMenuItem
-        Action = CopyToRenoiseAct
-        ImageIndex = 44
-      end
-      object CopyToFami: TMenuItem
-        Action = CopyToFamiAct
-        ImageIndex = 44
-      end
-      object CopyToFurnace: TMenuItem
-        Action = CopyToFurnaceAct
-        ImageIndex = 44
+      object CopyToExt: TMenuItem
+        Action = CopyToExtAct
       end
       object N4: TMenuItem
         Caption = '-'
@@ -869,29 +856,11 @@ object MainForm: TMainForm
       Category = 'Edit'
       Caption = 'JmpLineEndAct'
     end
-    object CopyToModplugAct: TAction
+    object CopyToExtAct: TAction
       Category = 'Edit'
-      Caption = 'Copy to OpenMPT'
-      OnExecute = CopyToModplugActExecute
-      OnUpdate = CopyToModplugActUpdate
-    end
-    object CopyToRenoiseAct: TAction
-      Category = 'Edit'
-      Caption = 'Copy to Renoise'
-      OnExecute = CopyToRenoiseActExecute
-      OnUpdate = CopyToRenoiseActUpdate
-    end
-    object CopyToFamiAct: TAction
-      Category = 'Edit'
-      Caption = 'Copy to FamiTracker'
-      OnExecute = CopyToFamiActExecute
-      OnUpdate = CopyToFamiActUpdate
-    end
-    object CopyToFurnaceAct: TAction
-      Category = 'Edit'
-      Caption = 'Copy to Furnace'
-      OnExecute = CopyToFurnaceActExecute
-      OnUpdate = CopyToFurnaceActUpdate
+      Caption = 'Copy to External Tracker'
+      OnExecute = CopyToExtActExecute
+      OnUpdate = CopyToExtActUpdate
     end
     object PackPatternAct: TAction
       Category = 'Edit'
@@ -5339,20 +5308,8 @@ object MainForm: TMainForm
     object N20: TMenuItem
       Caption = '-'
     end
-    object CopyTo: TMenuItem
-      Caption = 'Copy To...'
-      object CopyOpenMPT: TMenuItem
-        Action = CopyToModplugAct
-      end
-      object CopyRenoise: TMenuItem
-        Action = CopyToRenoiseAct
-      end
-      object CopyFami: TMenuItem
-        Action = CopyToFamiAct
-      end
-      object CopyFurnace: TMenuItem
-        Action = CopyToFurnaceAct
-      end
+    object CopyToExternalTracker: TMenuItem
+      Action = CopyToExtAct
     end
     object N6: TMenuItem
       Caption = '-'

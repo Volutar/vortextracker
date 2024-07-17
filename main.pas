@@ -304,16 +304,9 @@ type
     TransposeDown3a: TMenuItem;
     TransposeUp5a: TMenuItem;
     TransposeDown5a: TMenuItem;
-    CopyToModPlug: TMenuItem;
-    CopyToRenoise: TMenuItem;
-    CopyToModplugAct: TAction;
-    CopyToRenoiseAct: TAction;
-    CopyToFamiAct: TAction;
-    CopyToFami: TMenuItem;
-    CopyTo: TMenuItem;
-    CopyOpenMPT: TMenuItem;
-    CopyRenoise: TMenuItem;
-    CopyFami: TMenuItem;
+    CopyToExt: TMenuItem;
+    CopyToExtAct: TAction;
+    CopyToExternalTracker: TMenuItem;
     N20: TMenuItem;
     N21: TMenuItem;
     PackPatternAct: TAction;
@@ -329,9 +322,6 @@ type
     Newturbosoudtrack3: TMenuItem;
     CenteringTimer: TTimer;
     Clearpatterns1: TMenuItem;
-    CopyToFurnace: TMenuItem;
-    CopyToFurnaceAct: TAction;
-    CopyFurnace: TMenuItem;
     function IsFileWritable(FilePath: String): Boolean;
     function VScrollVisible(NewHeight: Integer): Boolean;
     function HScrollVisible(NewLeft: Integer): Boolean;
@@ -592,12 +582,8 @@ type
     procedure TransposeDown3Update(Sender: TObject);
     procedure TransposeUp5Update(Sender: TObject);
     procedure TransposeDown5Update(Sender: TObject);
-    procedure CopyToModplugActUpdate(Sender: TObject);
-    procedure CopyToRenoiseActUpdate(Sender: TObject);
-    procedure CopyToModplugActExecute(Sender: TObject);
-    procedure CopyToRenoiseActExecute(Sender: TObject);
-    procedure CopyToFamiActUpdate(Sender: TObject);
-    procedure CopyToFamiActExecute(Sender: TObject);
+    procedure CopyToExtActUpdate(Sender: TObject);
+    procedure CopyToExtActExecute(Sender: TObject);
     procedure PackPatternActExecute(Sender: TObject);
     procedure ExportPSGActExecute(Sender: TObject);
     procedure ExportPSGActUpdate(Sender: TObject);
@@ -605,8 +591,6 @@ type
     procedure File1Click(Sender: TObject);
     procedure CenteringTimerTimer(Sender: TObject);
     procedure Clearpatterns1Click(Sender: TObject);
-    procedure CopyToFurnaceActUpdate(Sender: TObject);
-    procedure CopyToFurnaceActExecute(Sender: TObject);
 
   private
     { Private declarations }
@@ -753,6 +737,7 @@ var
   ManualChipFreq: Integer;
   DefaultChipFreq: Integer;
   DefaultIntFreq: Integer;
+  ExternalTracker: Integer;
 
   ExportSampleRate, ExportBitRate, ExportChannels, ExportChip, ExportRepeats: Integer;
   ExportPath: String;
@@ -2554,6 +2539,7 @@ var
     Saved_NumberOfBuffers,
     Saved_WODevice: integer;
     Saved_ChipType: ChTypes;
+    Saved_ExternalTracker: Integer;
     Saved_EngineIndex: Integer;
     Saved_FeaturesLevel: integer;
     Saved_DetectFeaturesLevel,
@@ -2734,6 +2720,10 @@ begin
       Form1.IntSel.ItemIndex := 6;
     end;
   end;
+
+  Saved_ExternalTracker := ExternalTracker;
+  Form1.ExtTrackerOpt.ItemIndex := ExternalTracker;
+
   Saved_EngineIndex := RenderEngine;
   Form1.Opt.ItemIndex := RenderEngine;
 
@@ -2948,6 +2938,9 @@ begin
 
     if Saved_Interrupt_Freq <> DefaultIntFreq then
       DefaultIntFreq := Saved_Interrupt_Freq;
+
+    if Saved_ExternalTracker <> ExternalTracker then
+      ExternalTracker := Saved_ExternalTracker;
 
     if RenderEngine <> Saved_EngineIndex then
       Set_Engine(Saved_EngineIndex);
@@ -4026,6 +4019,7 @@ begin
     SetIntParam('DefaultChipFreq', DefaultChipFreq);
     SetIntParam('ManualChipFreq', ManualChipFreq);
     SetIntParam('DefaultIntFreq', DefaultIntFreq);
+    SetIntParam('ExternalTracker', ExternalTracker);
     SetIntParam('SampleRate', SampleRate);
     SetIntParam('SampleBit', SampleBit);
     SetIntParam('NumberOfChannels', NumberOfChannels);
@@ -4067,7 +4061,8 @@ begin
     begin
       SetIntParam('WindowX', Left);
       SetIntParam('WindowY', Top);
-      SetIntParam('WindowWidth', LastChildWidth + DoubleBorderSize);
+      if LastChildWidth>=400 then
+        SetIntParam('WindowWidth', LastChildWidth + DoubleBorderSize);
       SetIntParam('WindowHeight', Height);
     end;
 
@@ -4302,6 +4297,8 @@ begin
     DefaultChipFreq := GetIntParam('DefaultChipFreq', 1750000);
     ManualChipFreq := GetIntParam('ManualChipFreq', 0);
     DefaultIntFreq := GetIntParam('DefaultIntFreq', 48828);
+
+    ExternalTracker := GetIntParam('ExternalTracker', 0);
 
     b := GetBoolParam('Filtering', True);
     SetFilter(b, Filt_M);
@@ -7601,48 +7598,23 @@ begin
     TMDIChild(ActiveMDIChild).Tracks.Focused;
 end;
 
-procedure TMainForm.CopyToModplugActUpdate(Sender: TObject);
+procedure TMainForm.CopyToExtActUpdate(Sender: TObject);
+var s:string;
 begin
-  CopyToModplugAct.Enabled := (MDIChildCount <> 0) and TMDIChild(ActiveMDIChild).Tracks.Focused and TMDIChild(ActiveMDIChild).Tracks.IsSelected;
+  CopyToExtAct.Enabled := (MDIChildCount <> 0) and TMDIChild(ActiveMDIChild).Tracks.Focused and TMDIChild(ActiveMDIChild).Tracks.IsSelected;
+  s:='Copy to '+Form1.ExtTrackerOpt.Items[ExternalTracker];
+  CopyToExtAct.Caption:=s;
 end;
 
-procedure TMainForm.CopyToRenoiseActUpdate(Sender: TObject);
-begin
-  CopyToRenoiseAct.Enabled := (MDIChildCount <> 0) and TMDIChild(ActiveMDIChild).Tracks.Focused and TMDIChild(ActiveMDIChild).Tracks.IsSelected;
-end;
-
-procedure TMainForm.CopyToFurnaceActUpdate(Sender: TObject);
-begin
-  CopyToFurnaceAct.Enabled := (MDIChildCount <> 0) and TMDIChild(ActiveMDIChild).Tracks.Focused and TMDIChild(ActiveMDIChild).Tracks.IsSelected;
-end;
-
-procedure TMainForm.CopyToModplugActExecute(Sender: TObject);
+procedure TMainForm.CopyToExtActExecute(Sender: TObject);
 begin
   if MDIChildCount = 0 then exit;
-  TMDIChild(ActiveMDIChild).CopyToModplug;
-end;
-
-procedure TMainForm.CopyToRenoiseActExecute(Sender: TObject);
-begin
-  if MDIChildCount = 0 then exit;
-  TMDIChild(ActiveMDIChild).CopyToRenoise;
-end;
-
-procedure TMainForm.CopyToFurnaceActExecute(Sender: TObject);
-begin
-  if MDIChildCount = 0 then exit;
-  TMDIChild(ActiveMDIChild).CopyToFurnace;
-end;
-
-procedure TMainForm.CopyToFamiActUpdate(Sender: TObject);
-begin
-  CopyToFamiAct.Enabled := (MDIChildCount <> 0) and TMDIChild(ActiveMDIChild).Tracks.Focused and TMDIChild(ActiveMDIChild).Tracks.IsSelected;
-end;
-
-procedure TMainForm.CopyToFamiActExecute(Sender: TObject);
-begin
-  if MDIChildCount = 0 then exit;
-  TMDIChild(ActiveMDIChild).CopyToFamiTracker;
+  Case ExternalTracker of
+    0 : TMDIChild(ActiveMDIChild).CopyToModplug;
+    1 : TMDIChild(ActiveMDIChild).CopyToRenoise;
+    2 : TMDIChild(ActiveMDIChild).CopyToFamiTracker;
+    3 : TMDIChild(ActiveMDIChild).CopyToFurnace;
+  end;
 end;
 
 procedure TMainForm.PackPatternActExecute(Sender: TObject);

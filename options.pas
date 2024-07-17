@@ -226,6 +226,8 @@ type
     OpenCustomNoteTableDialog1: TOpenDialog;
     RemapOnlyPan1: TCheckBox;
     optMidiEnable: TCheckBox;
+    ExtTrackerOpt: TComboBox;
+    Label8: TLabel;
     procedure StopAndStart;
     procedure ChipSelClick(Sender: TObject);
     procedure IntSelClick(Sender: TObject);
@@ -403,6 +405,7 @@ type
     procedure LoadCustomNoteTableClick(Sender: TObject);
     procedure RemapOnlyPan1Click(Sender: TObject);
     procedure optMidiEnableClick(Sender: TObject);
+    procedure ExtTrackerOptChange(Sender: TObject);
 
 
 
@@ -1958,6 +1961,12 @@ procedure TForm1.optMidiEnableClick(Sender: TObject);
 begin
   DisableMidi := not optMidiEnable.Checked;
   if DisableMidi then MainForm.midiin1.StopAndClose;
+end;
+
+procedure TForm1.ExtTrackerOptChange(Sender: TObject);
+begin
+  ExternalTracker := ExtTrackerOpt.ItemIndex;
+
 end;
 
 end.

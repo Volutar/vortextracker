@@ -52,11 +52,8 @@ const
   HK_JMP_PAT_END          = 36;
   HK_JMP_LINE_START       = 37;
   HK_JMP_LINE_END         = 38;
-  HK_COPY_MODPLUG         = 39;
-  HK_COPY_RENOISE         = 40;
-  HK_COPY_FAMI            = 41;
-  HK_COPY_FURNACE         = 42;
-  HK_PATTERN_PACKER       = 43;
+  HK_COPY_EXTERNAL        = 39;
+  HK_PATTERN_PACKER       = 40;
 
 
   SystemHotKeys : array[0..12] of string = (
@@ -67,7 +64,7 @@ const
   );
 
 var
-  VTHotKeys : array[0..43, 0..1] of string = (
+  VTHotKeys : array[0..40, 0..1] of string = (
       ('Play/Stop',               'Space'),        // HK_PLAY_STOP
       ('Play from Line',          'F5'),           // HK_PLAY_FROM_LINE
       ('Play Track from Start',   'F6'),           // HK_PLAY_FROM_START
@@ -107,10 +104,7 @@ var
       ('Jump to the pattern last line',  'Ctrl+End'),      // HK_JMP_PAT_END
       ('Jump to the line start',         'Home'),          // HK_JMP_LINE_START
       ('Jump to the line end',           'End'),           // HK_JMP_LINE_END
-      ('Copy pattern to OpenMPT',        'Ctrl+Alt+C'),    // HK_COPY_MODPLUG
-      ('Copy pattern to Renoise',        'Ctrl+Shift+C'),  // HK_COPY_RENOISE
-      ('Copy pattern to FamiTracker',    'Alt+C'),         // HK_COPY_FAMI
-      ('Copy pattern to Furnace',        'Shift+Alt+C'),   // HK_COPY_FURNACE
+      ('Copy pattern to OpenMPT',        'Ctrl+Alt+C'),    // HK_COPY_EXTERNAL
       ('Pattern packer',                 'Ctrl+P')         // HK_PATTERN_PACKER
   );
 
@@ -253,10 +247,7 @@ begin
     HK_JMP_PAT_END:          JmpPatEndAct.ShortCut := ShortCut;
     HK_JMP_LINE_START:       JmpLineStartAct.ShortCut := ShortCut;
     HK_JMP_LINE_END:         JmpLineEndAct.ShortCut := ShortCut;
-    HK_COPY_MODPLUG:         begin CopyToModplugAct.ShortCut := ShortCut; CopyToModplug.ShortCut := ShortCut; end;
-    HK_COPY_RENOISE:         begin CopyToRenoiseAct.ShortCut := ShortCut; CopyToRenoise.ShortCut := ShortCut; end;
-    HK_COPY_FAMI:            begin CopyToFamiAct.ShortCut := ShortCut; CopyToFami.ShortCut := ShortCut; end;
-    HK_COPY_FURNACE:         begin CopyToFurnaceAct.ShortCut := ShortCut; CopyToFurnace.ShortCut := ShortCut; end;
+    HK_COPY_EXTERNAL:        begin CopyToExtAct.ShortCut := ShortCut; CopyToExt.ShortCut := ShortCut; end;
     HK_PATTERN_PACKER:       PackPatternAct.ShortCut := ShortCut;
   else
   end;
