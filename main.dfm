@@ -421,6 +421,10 @@ object MainForm: TMainForm
         Action = CopyToFamiAct
         ImageIndex = 44
       end
+      object CopyToFurnace: TMenuItem
+        Action = CopyToFurnaceAct
+        ImageIndex = 44
+      end
       object N4: TMenuItem
         Caption = '-'
       end
@@ -882,6 +886,12 @@ object MainForm: TMainForm
       Caption = 'Copy to FamiTracker'
       OnExecute = CopyToFamiActExecute
       OnUpdate = CopyToFamiActUpdate
+    end
+    object CopyToFurnaceAct: TAction
+      Category = 'Edit'
+      Caption = 'Copy to Furnace'
+      OnExecute = CopyToFurnaceActExecute
+      OnUpdate = CopyToFurnaceActUpdate
     end
     object PackPatternAct: TAction
       Category = 'Edit'
@@ -5339,6 +5349,9 @@ object MainForm: TMainForm
       end
       object CopyFami: TMenuItem
         Action = CopyToFamiAct
+      end
+      object CopyFurnace: TMenuItem
+        Action = CopyToFurnaceAct
       end
     end
     object N6: TMenuItem

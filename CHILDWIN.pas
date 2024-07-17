@@ -928,9 +928,11 @@ type
     procedure SpeedButton27Click(Sender: TObject);
     procedure CopyToFamiTracker;
     procedure CopyToModplug;
+    procedure CopyToFurnace;
     procedure CopyToRenoise;
     procedure PasteFamiTrackerPattern;
     procedure PasteModPlugPattern(txt: String);
+    procedure PasteFurnacePattern(txt: String);
     procedure PasteRenoisePattern(txt: String);    
     procedure UpDown15ChangingEx(Sender: TObject; var AllowChange: Boolean; NewValue: Smallint; Direction: TUpDownDirection);
     procedure AutoHLCheckClick(Sender: TObject);
@@ -18559,6 +18561,116 @@ begin
   Tracks.ShowMyCaret;
 end;
 
+procedure TMDIChild.CopyToFurnace;
+var
+  res, line, s: string;
+  X1, X2, Y1, Y2, PatLine: Integer;
+  FromChan, ToChan, CurChan: Integer;
+  ChannelLine: PChannelLine;
+
+begin
+  if not Tracks.IsSelected then Exit;
+  LastClipboard := LCNone;
+
+  res := 'org.tildearrow.furnace - Pattern Data (212)'#13#10'0'#13#10;
+  try
+    EmptyClipboard;
+    X2 := Tracks.CursorX;
+    X1 := Tracks.SelX;
+    if X1 > X2 then
+    begin
+      X1 := X2;
+      X2 := Tracks.SelX
+    end;
+    Y1 := Tracks.SelY;
+    Y2 := Tracks.CurrentPatLine;
+    if Y1 > Y2 then
+    begin
+      Y1 := Y2;
+      Y2 := Tracks.SelY
+    end;
+
+    FromChan := 0;
+    if (X1 <= 20) then FromChan := 0;
+    if (X1 > 20) and (X1 <= 34) then FromChan := 1;
+    if (X1 > 34) and (X1 <= 48) then FromChan := 2;
+
+    ToChan := 0;
+    if (X2 <= 20) then ToChan := 0;
+    if (X2 > 20) and (X2 <= 34) then ToChan := 1;
+    if (X2 > 34) and (X2 <= 48) then ToChan := 2;
+
+
+    // Note poses [8, 22, 36]
+
+    for PatLine := Y1 to Y2 do begin
+
+      for CurChan := FromChan to ToChan do begin
+        line := '...........|';
+        ChannelLine := @VTMP.Patterns[PatNum].Items[PatLine].Channel[ChanAlloc[CurChan]];
+
+        // Note
+        if ChannelLine.Note <> -1 then begin
+          s := NoteToStr(ChannelLine.Note);
+          if s = 'R--' then begin
+            line[1] := 'O';
+            line[2] := 'F';
+            line[3] := 'F';
+          end
+          else begin
+            line[1] := s[1];
+            line[2] := s[2];
+            line[3] := s[3];
+          end;
+        end;
+
+        // Sample
+        if ChannelLine.Sample > 0 then begin
+          s := Format('%.2d', [ChannelLine.Sample]);
+          line[4] := s[1];
+          line[5] := s[2];
+        end;
+
+        // Volume
+        if ChannelLine.Volume > 0 then begin
+          s := Format('%.2x', [ChannelLine.Volume]);
+          line[6] := s[1];
+          line[7] := s[2];
+        end;
+
+        // Command
+        if ChannelLine.Additional_Command.Number > 0 then begin
+          s := Format('%.2x', [ChannelLine.Additional_Command.Parameter]);
+          line[10] := s[1];
+          line[11] := s[2];
+
+          case ChannelLine.Additional_Command.Number of
+            2:  begin line[8] := '0'; line[9] := '1'; end;  // Tone Slide Up
+            1:  begin line[8] := '0'; line[9] := '2'; end;  // Tone Slide Down
+            3:  begin line[8] := '0'; line[9] := '3'; end;  // Tone Portamento
+            $B: begin line[8] := '0'; line[9] := 'F'; end;  // Set Speed
+          end;
+        end;
+
+        res := res + line;
+      end;
+
+      res := res + #13#10;
+
+    end;
+
+    Clipboard.AsText := res;
+
+  finally
+    CloseClipboard;
+  end;
+
+  Tracks.RemoveSelection;
+  Tracks.HideMyCaret;
+  Tracks.RedrawTracks(0);
+  Tracks.ShowMyCaret;
+end;
+
 procedure TMDIChild.CopyToRenoise;
 var
   res: string;
@@ -18843,6 +18955,154 @@ begin
   SongChanged := True;
   BackupSongChanged := True;
   
+  Tracks.HideMyCaret;
+  Tracks.RedrawTracks(0);
+  Tracks.ShowMyCaret;
+end;
+
+procedure TMDIChild.PasteFurnacePattern(txt: String);
+var
+  i, j, num, CurChan, StartChan, PatLine: Integer;
+  Note: ShortInt;
+  Lines, ChanLines: TStrings;
+  ChannelLine: PChannelLine;
+  ModType: String;
+  ColOffset, ColOffsetLeft, XOffset:Integer;
+
+begin
+
+  SavePatternUndo;
+
+  StartChan := 0;
+  if (Tracks.CursorX <= 20) then StartChan := 0;
+  if (Tracks.CursorX > 20) and (Tracks.CursorX <= 34) then StartChan := 1;
+  if (Tracks.CursorX > 34) and (Tracks.CursorX <= 48) then StartChan := 2;
+  PatLine := Tracks.CurrentPatLine;
+
+  Lines := TStringList.Create;
+  ChanLines := TStringList.Create;
+
+  SplitRegExpr('\r?\n', txt, Lines);
+
+  // line 1 contains offset (note, instrument, volume) of first data to paste
+  ColOffsetLeft := StrToInt(Lines[1]);
+
+  for i := 2 to Lines.Count-1 do begin
+    ColOffset := ColOffsetLeft;
+    ChanLines.Clear;
+
+    // Remove more than 3 channels
+    Lines[i] := ReplaceRegExpr('^([^|]+\|)([^|]+\|)([^|]+\|).*$', Lines[i], '$1$2$3', True);
+
+    // Get parts for each channel
+    SplitRegExpr('\|', Lines[i], ChanLines);
+    ChanLines.Delete(ChanLines.Count-1);
+
+    CurChan := StartChan;
+    for j := 0 to ChanLines.Count-1 do begin
+      ChannelLine := @VTMP.Patterns[PatNum].Items[PatLine].Channel[ChanAlloc[CurChan]];
+      ChannelLine.Ornament := 0;
+      ChannelLine.Envelope := 0;
+      XOffset := 1;
+
+      // Note
+      if (ColOffset <= 0) then begin
+        if (AnsiContainsStr(ChanLines[j], 'OFF') or AnsiContainsStr(ChanLines[j], 'REL') or (ChanLines[j][XOffset+0] = '=')) then
+          Note := -2
+        else if ChanLines[j][XOffset+0] in ['.', ' '] then
+          Note := -1
+        else
+          Note := SGetNote2(ChanLines[j][XOffset+0]+ChanLines[j][XOffset+1]+ChanLines[j][XOffset+2]);
+        ChannelLine.Note := Note;
+
+        XOffset := XOffset + 3;
+      end;
+
+      // Sample
+      if (ColOffset <= 1) then begin
+        if ChanLines[j][XOffset+0] = #0 then Break;
+        if not (ChanLines[j][XOffset+0] in ['.', ' ']) and not (ChanLines[j][XOffset+1] in ['.', ' ']) then begin
+          SGetNumber(ChanLines[j][XOffset+0]+ChanLines[j][XOffset+1], 30, num);
+          //num := StrToInt(ChanLines[j][XOffset+0]+ChanLines[j][XOffset+1]) and 31;
+          ChannelLine.Sample := num + 1;
+        end
+        else
+          ChannelLine.Sample := 0;
+
+        XOffset := XOffset + 2;
+      end;
+
+      // Volume
+      if (ColOffset <= 2) then begin
+        if ChanLines[j][XOffset+0] = #0 then Break;
+        if not (ChanLines[j][XOffset+0] in ['.', ' ']) and not (ChanLines[j][XOffset+1] in ['.', ' ']) then begin
+          SGetNumber(ChanLines[j][XOffset+0]+ChanLines[j][XOffset+1], 255, num);
+          ChannelLine.Ornament := num div 16;
+          ChannelLine.Volume   := num mod 16;
+        end
+        else begin
+          ChannelLine.Ornament := 0;
+          ChannelLine.Volume   := 0;
+        end;
+
+        XOffset := XOffset + 2;
+      end;
+
+      // Command
+      if (ChanLines[j][XOffset+0] <> #0) then begin
+        ChannelLine.Additional_Command.Number    := 0;
+        ChannelLine.Additional_Command.Delay     := 0;
+        ChannelLine.Additional_Command.Parameter := 0;
+
+        // skip incomplete commands
+        if ((ColOffset >= 3) and (((ColOffset-3) and 1) = 1)) then begin
+          XOffset := XOffset + 2;
+        end;
+        ColOffset := 0;
+
+        // then parse everything left
+        if (ChanLines[j][XOffset+0] <> #0) then repeat
+          if (not (ChanLines[j][XOffset+0] in ['.', ' '])) then case (StrToInt('$'+ChanLines[j][XOffset+0]+ChanLines[j][XOffset+1])) of
+            // Tone Slide Up
+            1: ChannelLine.Additional_Command.Number := 2;
+            // Tone Slide Down
+            2: ChannelLine.Additional_Command.Number := 1;
+            // Tone Portamento
+            3: ChannelLine.Additional_Command.Number := 3;
+            // Speed
+            $0F: ChannelLine.Additional_Command.Number := $b;
+            // TODO: furnace AY-specific commands
+          end;
+          XOffset := XOffset + 2;
+
+          if (ChanLines[j][XOffset+0] = #0) then break;
+          if ((ChannelLine.Additional_Command.Number <> 0) and (not (ChanLines[j][XOffset+0] in ['.', ' ']))) then begin
+            ChannelLine.Additional_Command.Parameter := StrToInt('$'+ChanLines[j][XOffset+0]+ChanLines[j][XOffset+1]);
+          end;
+          XOffset := XOffset + 2;
+
+        until (ChanLines[j][XOffset+0] = #0);
+      end(* else begin
+        ChannelLine.Additional_Command.Number    := 0;
+        ChannelLine.Additional_Command.Delay     := 0;
+        ChannelLine.Additional_Command.Parameter := 0;
+      end*);
+
+      if CurChan = 2 then Break;
+      Inc(CurChan);
+    end;
+
+    Inc(PatLine);
+    if PatLine = VTMP.Patterns[PatNum].Length then Break;
+  end;
+
+  Lines.Free;
+  ChanLines.Free;
+
+  SavePatternRedo;
+  SongChanged := True;
+  BackupSongChanged := True;
+
   Tracks.HideMyCaret;
   Tracks.RedrawTracks(0);
   Tracks.ShowMyCaret;
@@ -19323,6 +19583,13 @@ begin
   if re.Exec(s) then begin
     re.Free;
     TMDIChild(ParentWin).PasteModPlugPattern(s);
+    Exit;
+  end;
+
+  re.Expression := '^org.tildearrow.furnace - Pattern Data';
+  if re.Exec(s) then begin
+    re.Free;
+    TMDIChild(ParentWin).PasteFurnacePattern(s);
     Exit;
   end;
 

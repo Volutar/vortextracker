@@ -329,6 +329,9 @@ type
     Newturbosoudtrack3: TMenuItem;
     CenteringTimer: TTimer;
     Clearpatterns1: TMenuItem;
+    CopyToFurnace: TMenuItem;
+    CopyToFurnaceAct: TAction;
+    CopyFurnace: TMenuItem;
     function IsFileWritable(FilePath: String): Boolean;
     function VScrollVisible(NewHeight: Integer): Boolean;
     function HScrollVisible(NewLeft: Integer): Boolean;
@@ -602,6 +605,8 @@ type
     procedure File1Click(Sender: TObject);
     procedure CenteringTimerTimer(Sender: TObject);
     procedure Clearpatterns1Click(Sender: TObject);
+    procedure CopyToFurnaceActUpdate(Sender: TObject);
+    procedure CopyToFurnaceActExecute(Sender: TObject);
 
   private
     { Private declarations }
@@ -7606,6 +7611,11 @@ begin
   CopyToRenoiseAct.Enabled := (MDIChildCount <> 0) and TMDIChild(ActiveMDIChild).Tracks.Focused and TMDIChild(ActiveMDIChild).Tracks.IsSelected;
 end;
 
+procedure TMainForm.CopyToFurnaceActUpdate(Sender: TObject);
+begin
+  CopyToFurnaceAct.Enabled := (MDIChildCount <> 0) and TMDIChild(ActiveMDIChild).Tracks.Focused and TMDIChild(ActiveMDIChild).Tracks.IsSelected;
+end;
+
 procedure TMainForm.CopyToModplugActExecute(Sender: TObject);
 begin
   if MDIChildCount = 0 then exit;
@@ -7616,6 +7626,12 @@ procedure TMainForm.CopyToRenoiseActExecute(Sender: TObject);
 begin
   if MDIChildCount = 0 then exit;
   TMDIChild(ActiveMDIChild).CopyToRenoise;
+end;
+
+procedure TMainForm.CopyToFurnaceActExecute(Sender: TObject);
+begin
+  if MDIChildCount = 0 then exit;
+  TMDIChild(ActiveMDIChild).CopyToFurnace;
 end;
 
 procedure TMainForm.CopyToFamiActUpdate(Sender: TObject);

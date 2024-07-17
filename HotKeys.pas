@@ -55,7 +55,8 @@ const
   HK_COPY_MODPLUG         = 39;
   HK_COPY_RENOISE         = 40;
   HK_COPY_FAMI            = 41;
-  HK_PATTERN_PACKER       = 42;
+  HK_COPY_FURNACE         = 42;
+  HK_PATTERN_PACKER       = 43;
 
 
   SystemHotKeys : array[0..12] of string = (
@@ -66,7 +67,7 @@ const
   );
 
 var
-  VTHotKeys : array[0..42, 0..1] of string = (
+  VTHotKeys : array[0..43, 0..1] of string = (
       ('Play/Stop',               'Space'),        // HK_PLAY_STOP
       ('Play from Line',          'F5'),           // HK_PLAY_FROM_LINE
       ('Play Track from Start',   'F6'),           // HK_PLAY_FROM_START
@@ -109,6 +110,7 @@ var
       ('Copy pattern to OpenMPT',        'Ctrl+Alt+C'),    // HK_COPY_MODPLUG
       ('Copy pattern to Renoise',        'Ctrl+Shift+C'),  // HK_COPY_RENOISE
       ('Copy pattern to FamiTracker',    'Alt+C'),         // HK_COPY_FAMI
+      ('Copy pattern to Furnace',        'Shift+Alt+C'),   // HK_COPY_FURNACE
       ('Pattern packer',                 'Ctrl+P')         // HK_PATTERN_PACKER
   );
 
@@ -254,6 +256,7 @@ begin
     HK_COPY_MODPLUG:         begin CopyToModplugAct.ShortCut := ShortCut; CopyToModplug.ShortCut := ShortCut; end;
     HK_COPY_RENOISE:         begin CopyToRenoiseAct.ShortCut := ShortCut; CopyToRenoise.ShortCut := ShortCut; end;
     HK_COPY_FAMI:            begin CopyToFamiAct.ShortCut := ShortCut; CopyToFami.ShortCut := ShortCut; end;
+    HK_COPY_FURNACE:         begin CopyToFurnaceAct.ShortCut := ShortCut; CopyToFurnace.ShortCut := ShortCut; end;
     HK_PATTERN_PACKER:       PackPatternAct.ShortCut := ShortCut;
   else
   end;
@@ -276,10 +279,13 @@ procedure LoadHotKeysFromText(HotKeysText: string);
 var
   HotKeysList : TStrings;
   I : Integer;
-
+  cc: Integer;
 begin
   HotKeysList := Split(',', HotKeysText);
-  for I := 0 to HotKeysList.Count-1 do
+
+  cc:=HotKeysList.Count-1;
+  if High(VTHotKeys) <> cc then exit; //wrong number of hotkeys
+  for I := 0 to cc do
   begin
     AssignHotKey(I, HotKeysList[I]);
   end;
