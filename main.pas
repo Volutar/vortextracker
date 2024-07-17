@@ -1618,8 +1618,10 @@ begin
       c.PageControl1.Left := 0;
       c.PageControl1.Top  := 0;
 
-      c.Panel16.Left := 456 + c.PageControl1.Left;
-      c.Panel17.Left := 456 + c.PageControl1.Left + c.Panel16.Width+1;
+//      c.Panel16.Left := 456 + c.PageControl1.Left;
+//      c.Panel17.Left := 456 + c.PageControl1.Left + c.Panel16.Width+1;
+      c.Panel16.Left := c.PageControl1.Left+c.PageControl1.Width-c.Panel16.Width*2-16;
+      c.Panel17.Left := c.Panel16.Left + c.Panel16.Width+2;
 
       c.TopBackgroundBox.Visible := False;
       c.SetWidth(c.PageControl1.Width, True);

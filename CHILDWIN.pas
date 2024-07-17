@@ -3390,8 +3390,11 @@ begin
   EnableAlign;
 
   // Mute/solo
-  Panel17.Left := PageControl1.Left + SheetWidth - Panel17.Width - 8;
-  Panel16.Left := Panel17.Left - Panel16.Width - 2;
+//  Panel17.Left := PageControl1.Left + SheetWidth - Panel17.Width - 8;
+//  Panel16.Left := Panel17.Left - Panel16.Width - 2;
+  Panel16.Left := PageControl1.Left+PageControl1.Width-Panel16.Width*2-16;
+  Panel17.Left := Panel16.Left + Panel16.Width+2;
+
 end;
 
 
