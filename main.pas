@@ -2370,8 +2370,9 @@ begin
     try
       midiin1.OpenAndStart;
     except
-//      Application.MessageBox('Sorry, MIDI keyboard busy or... something else happened :)',
-//        'Vortex Tracker II', MB_OK + MB_ICONWARNING + MB_TOPMOST);
+      DisableMidi:=True;
+      Application.MessageBox('Sorry, MIDI keyboard busy or... something else happened :)',
+        'Vortex Tracker II', MB_OK + MB_ICONWARNING + MB_TOPMOST);
     end;
   end;
 
@@ -7544,6 +7545,8 @@ begin
     try
       midiin1.OpenAndStart;
     except
+      DisableMidi := True; //cannot enable
+      Form1.optMidiEnable.Checked := not DisableMidi;
     end;
 
 end;
