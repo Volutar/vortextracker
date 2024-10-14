@@ -3183,6 +3183,9 @@ begin
     if CW.TSWindow[1] <> nil then
       VTM2TextFile(FileName, CW.TSWindow[1].VTMP, True);
   end;
+  CW.BackupSongChanged := False;
+  if CW.TSWindow[0] <> nil then CW.TSWindow[0].BackupSongChanged := False;
+  if CW.TSWindow[1] <> nil then CW.TSWindow[1].BackupSongChanged := False;
 end;
 
 function GetMainModule:TMDIChild;

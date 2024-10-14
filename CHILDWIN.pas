@@ -20893,8 +20893,7 @@ begin
   s := ExtractFileDir(FilePath) + '\' + ExtractFileNameEX(FilePath) +
        ' ver ' + Format('%.3d', [BackupVersionCounter]) + '.vt2';
 
-  if MainForm.SavePT3Backup(Self, s, True) then
-    BackupSongChanged := False;
+  MainForm.SavePT3Backup(Self, s, True);
 end;
 
 procedure TMDIChild.FormActivate(Sender: TObject);
