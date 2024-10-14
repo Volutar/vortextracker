@@ -449,6 +449,7 @@ type
     procedure RedoUpdate(Sender: TObject);
     procedure RedoExecute(Sender: TObject);
     procedure CheckCommandLine;
+    function GetFirstModule(CW:TMDIChild):TMDIChild;
     function SavePT3(CW: TMDIChild; FileName: string; AsText: boolean): boolean;
     function SavePT3Backup(CW: TMDIChild; FileName: string; AsText: boolean): boolean;
     function AllowSave(fn: string): boolean;
@@ -1791,7 +1792,7 @@ var
   Child: TMDIChild;
   Ok: boolean;
   VTMP2,VTMP3: PModule;
-  i, numb: integer;
+  i, numb, InitLeft: integer;
   NewSize: TSize;
   OpenedFiles: TStringList;
 
@@ -1854,6 +1855,8 @@ begin
     // Create a new child
     Child := TMDIChild.Create(Application);
     Child.Top := 0;
+    if i=0 then InitLeft:=Child.Left
+    else Child.Left := InitLeft + i*20;
     if (WindowState = wsNormal) and (LastChildHeight <> 0) and (MDIChildCount > 1) then begin
       Child.Height := LastChildHeight;
       Child.PageControl1.Height := Child.ClientHeight;
@@ -2986,6 +2989,32 @@ begin
   end;
 end;
 
+function TMainForm.GetFirstModule(CW:TMDIChild):TMDIChild;
+var
+  xl,xlb:Integer;
+begin
+  xl:=CW.Left;
+  xlb:=0;
+  if CW.TSWindow[0]<>nil then
+  begin
+    if CW.TSWindow[0].Left<xl then
+    begin
+      xl:=CW.TSWindow[0].Left;
+      xlb:=1;
+    end;
+  end;
+  if CW.TSWindow[1]<>nil then
+  begin
+    if CW.TSWindow[1].Left<xl then
+    begin
+      xl:=CW.TSWindow[1].Left;
+      xlb:=2;
+    end;
+  end;
+  if xlb=0 then result:=CW;
+  if xlb=1 then result:=CW.TSWindow[0];
+  if xlb=2 then result:=CW.TSWindow[1];
+end;
 
 function TMainForm.SavePT3(CW: TMDIChild; FileName: string; AsText: boolean):boolean;
 var
@@ -2997,6 +3026,7 @@ var
 begin
   Result := False;
   if not IsFileWritable(FileName) then Exit;
+  CW:=GetFirstModule(CW);
   if not AsText then
   begin
     ErrMsg := VTM2PT3(@PT3, CW.VTMP, Size);
@@ -3093,6 +3123,7 @@ var
 begin
   Result := False;
   if not IsFileWritable(FileName) then Exit;
+  CW:=GetFirstModule(CW);
   if not AsText then
   begin
     ErrMsg := VTM2PT3(@PT3, CW.VTMP, Size);
