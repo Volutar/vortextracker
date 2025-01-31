@@ -889,7 +889,7 @@ var
 //      else
 //        Module_SetCurrentPosition(LeadWindow.PositionNumber);
 
-        if PlayWindow.PositionNumber > PlayWindow.VTMP.Positions.Length - 1 then
+        if PlayWindow.PositionNumber >= PlayWindow.VTMP.Positions.Length - 1 then
           Module_SetCurrentPosition(PlayWindow.VTMP.Positions.Loop)
         else
           Module_SetCurrentPosition(PlVars[CurChip].CurrentPosition+1);

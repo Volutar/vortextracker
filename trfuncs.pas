@@ -503,6 +503,7 @@ procedure NewVTMP(var VTMP: PModule);
 
 function isSampleEmpty(VTMP:PModule; i: integer):boolean;
 function isOrnamentEmpty(VTMP:PModule; i: integer):boolean;
+procedure LogToFile(s:string);
 
 type
   PT3ToneTable = array[0..95] of word;
@@ -615,6 +616,26 @@ uses AY, WaveOutAPI, FXMImport, Main, RegExpr, Classes, StrUtils;
 
 var
   VTM: PModule;
+
+/////////////////////////////////////////////////
+procedure LogToFile(s:string);
+var
+ myFile: Text;
+const
+ aFilePath :String ='c:\VortexTracker2.5\log.log';
+begin
+  try
+    AssignFile(myFile, aFilePath);
+    if FileExists(aFilePath) then
+      Append(myFile)
+    else
+      Rewrite(myFile);
+    WriteLn(myFile, FormatDateTime('dd-mm-yyyy hh:nn:ss.zzz',Now) + ': ' + s);
+    Flush(myFile);
+  finally
+    CloseFile(myFile);
+  end;
+end;
 
 
 procedure checkVTMPointer;
@@ -9094,7 +9115,7 @@ begin
   end;
 end;
 
-function GetPositionTime;
+function GetPositionTime(VTM: PModule; Pos: integer; var PosDelay: integer): integer;
 var
   i, j, k, d, p: integer;
 begin
@@ -9122,7 +9143,7 @@ begin
   PosDelay := d
 end;
 
-function GetPositionTimeEx;
+function GetPositionTimeEx(VTM: PModule; Pos, PosDelay, Line: integer): integer;
 var
   j, k, p: integer;
 begin
@@ -9146,7 +9167,7 @@ begin
     end;
 end;
 
-procedure GetTimeParams;
+procedure GetTimeParams(VTM: PModule; Time: integer; var Pos, Line: integer);
 var
   i, j, k, d, p, ct, tmp: integer;
 begin
