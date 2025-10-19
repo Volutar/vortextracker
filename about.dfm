@@ -448,7 +448,7 @@ object AboutBox: TAboutBox
           ''
           '(c) Ivan Pirog (Flexx/Enhancers) 2017-2021'
           'Version 1.5 - 2.6'
-          '(c) Dexus (Volutar) 2022-2023'
+          '(c) Dexus (Volutar) 2022-2025'
           'Version 2.6.1'
           ''
           'Date of build: %datetime%')

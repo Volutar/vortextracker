@@ -8771,9 +8771,9 @@ var
           Skp[ChNum] := PSM.Index[PatAddr] - $B7;
         $F9:
           begin
-            RetAddress[ChNum] := PatAddr + 3;
-            RetCnt[ChNum] := PSM.Index[word(PatAddr + 2)];
-            PatAddr := WordPtr(@PSM.Index[PatAddr])^ - 1;
+            RetAddress[ChNum] := PatAddr + 4;
+            RetCnt[ChNum] := PSM.Index[word(PatAddr + 3)];
+            PatAddr := WordPtr(@PSM.Index[PatAddr + 1])^ - 1;
           end;
         $FA..$FB:
           Orn[ChNum] := PSM.Index[PatAddr] - $FA + 32;
